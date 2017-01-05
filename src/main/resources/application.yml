@@ -1,0 +1,9 @@
+server:
+  port: 9999
+
+security:
+  user:
+    name: user
+    password: oauth-poc
+
+logging.level.org.springframework.web: TRACE
