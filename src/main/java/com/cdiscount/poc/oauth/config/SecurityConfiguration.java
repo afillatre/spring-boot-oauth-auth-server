@@ -18,7 +18,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
     public void globalUserDetails(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication().withUser("user").password("oauth-poc").roles("USER");
+        auth.inMemoryAuthentication()
+                .withUser("user").password("oauth-poc").roles("USER").and()
+                .withUser("resources-server").password("password").roles("RESOURCES");
     }
 
     @Override
@@ -26,7 +28,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http
                 .authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS).permitAll()
-                .antMatchers("/user").permitAll()
+                .antMatchers("/user", "/me", "/jwt").permitAll()
                 .anyRequest().authenticated()
                 //.and().formLogin()
                 .and().httpBasic()

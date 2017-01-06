@@ -5,5 +5,8 @@ security:
   user:
     name: user
     password: oauth-poc
+  oauth2:
+    resource.jwt:
+      key-value: oauth
 
 logging.level.org.springframework.web: TRACE
