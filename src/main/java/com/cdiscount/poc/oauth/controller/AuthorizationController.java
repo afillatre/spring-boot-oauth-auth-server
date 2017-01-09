@@ -1,18 +1,15 @@
 package com.cdiscount.poc.oauth.controller;
 
+import com.cdiscount.poc.oauth.security.oauth2.provider.token.store.CustomJwtAccessTokenConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.endpoint.CheckTokenEndpoint;
-import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
-import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.security.Principal;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -21,40 +18,25 @@ import java.util.Map;
  * @since 04/01/2017.
  */
 @RestController
+@DependsOn("checkTokenEndpoint")
 public class AuthorizationController {
 
     @Autowired
-//    private ResourceServerTokenServices resourceServerTokenServices;
-    private CheckTokenEndpoint checkTokenEndpoint;
+    private ResourceServerTokenServices resourceServerTokenServices;
 
     @Autowired
-    private JwtAccessTokenConverter jwtAccessTokenConverter;
+    private CustomJwtAccessTokenConverter jwtAccessTokenConverter;
 
     @RequestMapping("/jwt")
-    public OAuth2AccessToken user(@RequestParam("token") String accessToken) {
-
-/*
-       OAuth2AccessToken token = resourceServerTokenServices.readAccessToken(accessToken);
-        if (token == null) {
-            throw new InvalidTokenException("Token was not recognised");
-        }
-
-        if (token.isExpired()) {
-            throw new InvalidTokenException("Token has expired");
-        }
-
-        OAuth2Authentication authentication = resourceServerTokenServices.loadAuthentication(token.getValue());
-        return jwtAccessTokenConverter.enhance(token, authentication);
-        */
-        Map<String, ?> stringMap = checkTokenEndpoint.checkToken(accessToken);
-        return null;
+    @PreAuthorize("hasRole('RESOURCES')")
+    public String getJWT(@RequestParam("token") String accessToken) {
+        return jwtAccessTokenConverter.getJWTFromAccessToken(accessToken);
     }
 
     @RequestMapping({ "/user", "/me" })
-    //@PreAuthorize("hasRole('RESOURCES')")
-    public Map<String, String> user(Principal principal) {
+    public Map<String, Object> user(@RequestParam("token") String accessToken) {
         Map<String, String> map = new LinkedHashMap<>();
-        map.put("name", principal.getName());
-        return map;
+        OAuth2AccessToken oAuth2AccessToken = resourceServerTokenServices.readAccessToken(accessToken);
+        return oAuth2AccessToken.getAdditionalInformation();
     }
 }

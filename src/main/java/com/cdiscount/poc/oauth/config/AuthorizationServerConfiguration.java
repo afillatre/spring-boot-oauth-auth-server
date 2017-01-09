@@ -1,5 +1,6 @@
 package com.cdiscount.poc.oauth.config;
 
+import com.cdiscount.poc.oauth.security.oauth2.provider.token.store.CustomJwtAccessTokenConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -10,11 +11,7 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.A
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
-import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
-import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
-import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
-import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
 @Configuration
 @EnableAuthorizationServer
@@ -32,7 +29,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     
     @Bean
     public JwtAccessTokenConverter accessTokenConverter() {
-        JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
+        JwtAccessTokenConverter jwtAccessTokenConverter = new CustomJwtAccessTokenConverter();
         jwtAccessTokenConverter.setSigningKey("oauth");
         return jwtAccessTokenConverter;
     }
@@ -40,8 +37,8 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
         endpoints
-            .authenticationManager(this.authenticationManager);
-            //.accessTokenConverter(accessTokenConverter());
+            .authenticationManager(this.authenticationManager)
+            .accessTokenConverter(accessTokenConverter());
     }
     
     @Override
